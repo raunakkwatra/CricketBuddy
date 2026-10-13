@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricketBuddy — Tournament Management System</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="appSidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <span class="logo-icon">🏏</span>
+                    <span class="logo-glow"></span>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">Cricket<span class="brand-highlight">Buddy</span></span>
+                    <span class="brand-sub">TOURNAMENT SUITE</span>
+                </div>
+                <button class="mobile-close-btn" id="sidebarCloseBtn" aria-label="Close sidebar">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-role-indicator" id="sidebarRoleBadge">
+                <span class="role-status-dot admin-dot"></span>
+                <span class="role-status-text">Role: <strong id="sidebarRoleLabel">Admin</strong></span>
+            </div>
+
+            <nav class="sidebar-menu">
+                <div class="menu-section-label">MAIN</div>
+                <a href="#dashboard" class="menu-item active" data-route="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <div class="menu-section-label">MANAGEMENT</div>
+                <a href="#teams" class="menu-item" data-route="teams">
+                    <i data-lucide="shield"></i>
+                    <span>Teams</span>
+                </a>
+                <a href="#players" class="menu-item" data-route="players">
+                    <i data-lucide="users"></i>
+                    <span>Players</span>
+                </a>
+                <a href="#matches" class="menu-item" data-route="matches">
+                    <i data-lucide="calendar"></i>
+                    <span>Matches</span>
+                </a>
+                <a href="#stadiums" class="menu-item" data-route="stadiums">
+                    <i data-lucide="map-pin"></i>
+                    <span>Stadiums</span>
+                </a>
+                <a href="#sponsors" class="menu-item" data-route="sponsors">
+                    <i data-lucide="briefcase"></i>
+                    <span>Sponsors</span>
+                </a>
+                <a href="#umpires" class="menu-item" data-route="umpires">
+                    <i data-lucide="flag"></i>
+                    <span>Umpires</span>
+                </a>
+
+                <div class="menu-section-label">ANALYTICS & STATS</div>
+                <a href="#scorecards" class="menu-item" data-route="scorecards">
+                    <i data-lucide="file-spreadsheet"></i>
+                    <span>Scorecards</span>
+                </a>
+                <a href="#statistics" class="menu-item" data-route="statistics">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Statistics</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status-pill" id="systemStatusPill">
+                    <span class="status-indicator-dot"></span>
+                    <div class="status-meta">
+                        <span class="status-name" id="dbStatusLabel">Connecting...</span>
+                        <span class="status-db">MySQL 9.7</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="app-main">
+            <!-- Topbar Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <nav class="breadcrumb-nav">
+                        <span class="crumb-root">CricketBuddy</span>
+                        <span class="crumb-separator">/</span>
+                        <span class="crumb-active" id="headerCrumb">Dashboard</span>
+                    </nav>
+                </div>
+
+                <div class="header-center">
+                    <div class="global-search-wrapper">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="globalSearchInput" placeholder="Quick search teams, players, venues, results..." autocomplete="off">
+                        <kbd class="search-shortcut">/</kbd>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <!-- Quick Refresh -->
+                    <button class="btn-icon" id="quickRefreshBtn" title="Refresh Live Data" aria-label="Refresh Data">
+                        <i data-lucide="refresh-cw"></i>
+                    </button>
+
+                    <!-- Theme Switcher -->
+                    <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Theme (Light/Dark)" aria-label="Toggle Theme">
+                        <div class="theme-toggle-track">
+                            <span class="theme-icon sun-icon"><i data-lucide="sun"></i></span>
+                            <span class="theme-icon moon-icon"><i data-lucide="moon"></i></span>
+                            <span class="theme-thumb"></span>
+                        </div>
+                    </button>
+
+                    <!-- User Profile & RBAC Menu -->
+                    <div class="user-menu-wrapper" id="userMenuWrapper">
+                        <button class="user-profile-btn" id="userProfileBtn">
+                            <div class="user-avatar" id="headerAvatar">AD</div>
+                            <div class="user-info">
+                                <span class="user-name" id="headerUserName">Admin User</span>
+                                <span class="user-badge admin-badge" id="headerRoleBadge">ADMIN</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="dropdown-chevron"></i>
+                        </button>
+
+                        <div class="user-dropdown-panel" id="userDropdownPanel">
+                            <div class="dropdown-header">
+                                <strong id="dropdownName">Admin User</strong>
+                                <span id="dropdownRoleDesc">Full administrative control</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-section-title">SWITCH ROLE (DEMO)</div>
+                            <button class="dropdown-item" id="switchAdminBtn">
+                                <i data-lucide="shield-check"></i>
+                                <span>Switch to Admin</span>
+                                <span class="kbd-hint">Full CRUD</span>
+                            </button>
+                            <button class="dropdown-item" id="switchViewerBtn">
+                                <i data-lucide="eye"></i>
+                                <span>Switch to Viewer</span>
+                                <span class="kbd-hint">Read-Only</span>
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item danger-action" id="authActionBtn">
+                                <i data-lucide="log-out" id="authActionIcon"></i>
+                                <span id="authActionLabel">Log Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Main Content View -->
+            <main class="app-content-body" id="viewContainer">
+                <!-- Dynamically populated by app.js -->
+            </main>
+
+            <!-- App Footer -->
+            <footer class="app-footer">
+                <div class="footer-left">
+                    <span>CricketBuddy Tournament Management System &copy; 2026</span>
+                    <span class="footer-dot">•</span>
+                    <span class="footer-sub">MySQL 9.7.1 &bull; Express REST API</span>
+                </div>
+                <div class="footer-right">
+                    <span class="footer-badge">v2.4 Pro</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Generic CRUD Modal Backdrop & Card -->
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="modal-card" id="modalCard" role="dialog" aria-modal="true">
+            <!-- Modal Content Injected Dynamically -->
+        </div>
+    </div>
+
+    <!-- Auth / Login Modal Backdrop -->
+    <div class="modal-backdrop" id="authModalBackdrop">
+        <div class="modal-card auth-modal-card" id="authModalCard" role="dialog" aria-modal="true">
+            <div class="auth-modal-header">
+                <div class="auth-logo-badge">🏏</div>
+                <h2>Welcome to CricketBuddy</h2>
+                <p>Select your access mode or sign in to continue</p>
+                <button class="modal-close-btn" id="closeAuthModalBtn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="auth-body">
+                <div class="auth-quick-cards">
+                    <div class="auth-role-card" id="quickAdminLogin">
+                        <div class="role-card-icon admin-bg"><i data-lucide="shield-check"></i></div>
+                        <div class="role-card-info">
+                            <h3>Admin Mode</h3>
+                            <p>Full control: Create, Edit & Delete teams, players, venues, matches, sponsors & umpires.</p>
+                        </div>
+                        <button class="btn btn-primary btn-block">Sign in as Admin</button>
+                    </div>
+
+                    <div class="auth-role-card" id="quickViewerLogin">
+                        <div class="role-card-icon viewer-bg"><i data-lucide="eye"></i></div>
+                        <div class="role-card-info">
+                            <h3>Viewer Mode</h3>
+                            <p>Browse statistics, search rosters, inspect fixtures, filter player performance.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-block">Continue as Viewer</button>
+                    </div>
+                </div>
+
+                <div class="auth-divider"><span>OR SIGN IN WITH CREDENTIALS</span></div>
+
+                <form id="customAuthForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="authUsername">Username or Email</label>
+                        <input type="text" id="authUsername" class="form-control" placeholder="admin or viewer" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="authPassword">Password</label>
+                        <input type="password" id="authPassword" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
