@@ -31,7 +31,7 @@ CREATE TABLE SPONSOR (
     SponsorID INT PRIMARY KEY AUTO_INCREMENT,
     SponsorName VARCHAR(100) NOT NULL,
     Industry VARCHAR(100),
-    ContractAmount DECIMAL(12,2),
+    ContractAmount DECIMAL(18,2),
     TeamID INT,
 
     FOREIGN KEY (TeamID)

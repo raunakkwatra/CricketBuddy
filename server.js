@@ -29,6 +29,11 @@ function handleDbError(res, error, actionMessage) {
       error: 'Cannot delete or modify this record because related tournament data references it (Foreign Key constraint). Please remove or reassign associated records first.'
     });
   }
+  if (error.code === 'ER_WARN_DATA_OUT_OF_RANGE' || error.errno === 1264) {
+    return res.status(400).json({
+      error: 'One of the numeric values entered is too large for the database limit.'
+    });
+  }
   return res.status(500).json({ error: actionMessage });
 }
 
