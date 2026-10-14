@@ -65,6 +65,9 @@ const api = {
             return null;
         } catch (error) {
             console.error(`[API Error ${endpoint}]:`, error);
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error("Cannot connect to backend server. Make sure 'node server.js' is running!");
+            }
             throw error;
         }
     },
