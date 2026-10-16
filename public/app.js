@@ -461,24 +461,269 @@ function handleRoute() {
     }
 
     renderCurrentView();
+
+    // Sync in-page filter input with active search query
+    const topInput = document.getElementById('globalSearchInput');
+    const tableInput = document.querySelector('.filter-input');
+    if (topInput && tableInput && topInput.value) {
+        tableInput.value = topInput.value;
+    }
 }
 
-function initGlobalSearch() {
-    const input = document.getElementById('globalSearchInput');
-    if (!input) return;
+// ==========================================================================
+// 6.1 Global Search Manager (Live Dropdown Across All Entities)
+// ==========================================================================
+const globalSearchManager = {
+    init() {
+        const input = document.getElementById('globalSearchInput');
+        const clearBtn = document.getElementById('searchClearBtn');
+        const resultsBox = document.getElementById('globalSearchResults');
+        if (!input || !resultsBox) return;
 
-    input.addEventListener('input', (e) => {
-        state.searchQuery = e.target.value.toLowerCase().trim();
-        renderCurrentView();
-    });
+        input.addEventListener('input', (e) => {
+            const rawVal = e.target.value;
+            const query = rawVal.trim();
+            if (clearBtn) clearBtn.style.display = query ? 'flex' : 'none';
 
-    // Keyboard shortcut '/'
-    window.addEventListener('keydown', (e) => {
-        if (e.key === '/' && document.activeElement !== input) {
-            e.preventDefault();
-            input.focus();
+            state.searchQuery = query.toLowerCase();
+
+            // Synchronize in-page table filter input if visible
+            const tableInput = document.querySelector('.filter-input');
+            if (tableInput && tableInput !== document.activeElement) {
+                tableInput.value = rawVal;
+            }
+
+            // Live filter current view table if on an entity page
+            if (state.currentView !== 'dashboard') {
+                renderCurrentView();
+            }
+
+            if (query.length > 0) {
+                this.renderResults(query, resultsBox);
+            } else {
+                resultsBox.style.display = 'none';
+            }
+        });
+
+        input.addEventListener('focus', () => {
+            const query = input.value.trim();
+            if (query.length > 0) {
+                this.renderResults(query, resultsBox);
+            }
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                input.value = '';
+                clearBtn.style.display = 'none';
+                resultsBox.style.display = 'none';
+                state.searchQuery = '';
+                const tableInput = document.querySelector('.filter-input');
+                if (tableInput) tableInput.value = '';
+                renderCurrentView();
+                input.focus();
+            });
         }
-    });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.header-center')) {
+                resultsBox.style.display = 'none';
+            }
+        });
+
+        // Keyboard navigation & shortcuts: '/' to focus, 'Escape' to close
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== input && !document.activeElement.matches('input, select, textarea')) {
+                e.preventDefault();
+                input.focus();
+                input.select();
+            }
+            if (e.key === 'Escape') {
+                resultsBox.style.display = 'none';
+                if (document.activeElement === input) {
+                    input.blur();
+                }
+            }
+        });
+    },
+
+    searchAll(query) {
+        const q = query.toLowerCase();
+
+        // 1. Teams
+        const teams = state.teams.filter(t =>
+            (t.TeamName && t.TeamName.toLowerCase().includes(q)) ||
+            (t.Coach && t.Coach.toLowerCase().includes(q)) ||
+            (t.HomeGround && t.HomeGround.toLowerCase().includes(q)) ||
+            (t.Owner && t.Owner.toLowerCase().includes(q))
+        );
+
+        // 2. Players
+        const players = state.players.filter(p =>
+            (p.PlayerName && p.PlayerName.toLowerCase().includes(q)) ||
+            (p.Role && p.Role.toLowerCase().includes(q)) ||
+            (p.Nationality && p.Nationality.toLowerCase().includes(q)) ||
+            (p.TeamName && p.TeamName.toLowerCase().includes(q))
+        );
+
+        // 3. Stadiums
+        const stadiums = state.stadiums.filter(s =>
+            (s.StadiumName && s.StadiumName.toLowerCase().includes(q)) ||
+            (s.City && s.City.toLowerCase().includes(q))
+        );
+
+        // 4. Sponsors
+        const sponsors = state.sponsors.filter(s =>
+            (s.SponsorName && s.SponsorName.toLowerCase().includes(q)) ||
+            (s.Industry && s.Industry.toLowerCase().includes(q)) ||
+            (s.TeamName && s.TeamName.toLowerCase().includes(q))
+        );
+
+        // 5. Matches
+        const matches = state.matches.filter(m =>
+            (m.MatchType && m.MatchType.toLowerCase().includes(q)) ||
+            (m.StadiumName && m.StadiumName.toLowerCase().includes(q)) ||
+            (m.Result && m.Result.toLowerCase().includes(q)) ||
+            String(m.MatchID).includes(q)
+        );
+
+        // 6. Umpires
+        const umpires = state.umpires.filter(u =>
+            (u.UmpireName && u.UmpireName.toLowerCase().includes(q)) ||
+            (u.Country && u.Country.toLowerCase().includes(q))
+        );
+
+        return { teams, players, stadiums, sponsors, matches, umpires };
+    },
+
+    renderResults(query, container) {
+        const { teams, players, stadiums, sponsors, matches, umpires } = this.searchAll(query);
+        const total = teams.length + players.length + stadiums.length + sponsors.length + matches.length + umpires.length;
+
+        if (total === 0) {
+            container.innerHTML = `
+                <div class="search-no-results">
+                    <p>No tournament records found for "<strong>${escapeHtml(query)}</strong>"</p>
+                </div>
+            `;
+            container.style.display = 'block';
+            return;
+        }
+
+        let html = '';
+
+        if (teams.length > 0) {
+            html += `<div class="search-result-group-title">Teams (${teams.length})</div>`;
+            teams.slice(0, 3).forEach(t => {
+                html += `
+                    <div class="search-result-item" onclick="globalSearchManager.selectResult('teams', '${escapeHtml(t.TeamName)}')">
+                        <div class="search-result-icon"><i data-lucide="shield"></i></div>
+                        <div class="search-result-info">
+                            <div class="search-result-title">${escapeHtml(t.TeamName)} <span class="search-result-badge badge-primary">Team</span></div>
+                            <div class="search-result-sub">Coach: ${escapeHtml(t.Coach || 'N/A')} • Venue: ${escapeHtml(t.HomeGround || 'N/A')}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        if (players.length > 0) {
+            html += `<div class="search-result-group-title">Players (${players.length})</div>`;
+            players.slice(0, 3).forEach(p => {
+                html += `
+                    <div class="search-result-item" onclick="globalSearchManager.selectResult('players', '${escapeHtml(p.PlayerName)}')">
+                        <div class="search-result-icon"><i data-lucide="users"></i></div>
+                        <div class="search-result-info">
+                            <div class="search-result-title">${escapeHtml(p.PlayerName)} <span class="search-result-badge badge-success">${escapeHtml(p.Role || 'Player')}</span></div>
+                            <div class="search-result-sub">${escapeHtml(p.TeamName || 'Unassigned')} • ${escapeHtml(p.Nationality || 'International')}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        if (stadiums.length > 0) {
+            html += `<div class="search-result-group-title">Stadiums (${stadiums.length})</div>`;
+            stadiums.slice(0, 3).forEach(s => {
+                html += `
+                    <div class="search-result-item" onclick="globalSearchManager.selectResult('stadiums', '${escapeHtml(s.StadiumName)}')">
+                        <div class="search-result-icon"><i data-lucide="map-pin"></i></div>
+                        <div class="search-result-info">
+                            <div class="search-result-title">${escapeHtml(s.StadiumName)} <span class="search-result-badge badge-info">${escapeHtml(s.City || '')}</span></div>
+                            <div class="search-result-sub">Capacity: ${Number(s.Capacity || 0).toLocaleString()} seats</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        if (sponsors.length > 0) {
+            html += `<div class="search-result-group-title">Sponsors (${sponsors.length})</div>`;
+            sponsors.slice(0, 3).forEach(s => {
+                html += `
+                    <div class="search-result-item" onclick="globalSearchManager.selectResult('sponsors', '${escapeHtml(s.SponsorName)}')">
+                        <div class="search-result-icon"><i data-lucide="briefcase"></i></div>
+                        <div class="search-result-info">
+                            <div class="search-result-title">${escapeHtml(s.SponsorName)} <span class="search-result-badge badge-purple">${escapeHtml(s.Industry || 'Commercial')}</span></div>
+                            <div class="search-result-sub">Team: ${escapeHtml(s.TeamName || 'N/A')} • Amount: $${Number(s.ContractAmount || 0).toLocaleString()}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        if (matches.length > 0) {
+            html += `<div class="search-result-group-title">Matches (${matches.length})</div>`;
+            matches.slice(0, 3).forEach(m => {
+                html += `
+                    <div class="search-result-item" onclick="globalSearchManager.selectResult('matches', 'Match #${m.MatchID}')">
+                        <div class="search-result-icon"><i data-lucide="calendar"></i></div>
+                        <div class="search-result-info">
+                            <div class="search-result-title">Match #${m.MatchID} (${escapeHtml(m.MatchType || 'T20')})</div>
+                            <div class="search-result-sub">${escapeHtml(m.StadiumName || 'Venue')} • ${escapeHtml(m.Result || 'Scheduled')}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        if (umpires.length > 0) {
+            html += `<div class="search-result-group-title">Umpires (${umpires.length})</div>`;
+            umpires.slice(0, 3).forEach(u => {
+                html += `
+                    <div class="search-result-item" onclick="globalSearchManager.selectResult('umpires', '${escapeHtml(u.UmpireName)}')">
+                        <div class="search-result-icon"><i data-lucide="flag"></i></div>
+                        <div class="search-result-info">
+                            <div class="search-result-title">${escapeHtml(u.UmpireName)} <span class="search-result-badge badge-warning">${escapeHtml(u.Country || '')}</span></div>
+                            <div class="search-result-sub">Experience: ${u.Experience || 0} years</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        container.innerHTML = html;
+        container.style.display = 'block';
+        refreshIcons();
+    },
+
+    selectResult(viewName, filterTerm) {
+        const input = document.getElementById('globalSearchInput');
+        const clearBtn = document.getElementById('searchClearBtn');
+        const resultsBox = document.getElementById('globalSearchResults');
+        if (resultsBox) resultsBox.style.display = 'none';
+
+        state.searchQuery = filterTerm ? filterTerm.toLowerCase() : '';
+        if (input) input.value = filterTerm || '';
+        if (clearBtn) clearBtn.style.display = filterTerm ? 'flex' : 'none';
+
+        window.location.hash = '#' + viewName;
+    }
+};
+
+function initGlobalSearch() {
+    globalSearchManager.init();
 }
 
 // ==========================================================================
@@ -1606,7 +1851,30 @@ function renderStatistics(container) {
 // ==========================================================================
 function handleFilterSearch(val) {
     state.searchQuery = val.toLowerCase().trim();
+
+    // Synchronize top search bar
+    const topInput = document.getElementById('globalSearchInput');
+    const clearBtn = document.getElementById('searchClearBtn');
+    if (topInput && document.activeElement !== topInput) {
+        topInput.value = val;
+        if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+    }
+
+    const activeEl = document.activeElement;
+    const isTableInput = activeEl && activeEl.classList.contains('filter-input');
+    const cursorPos = isTableInput ? activeEl.selectionStart : null;
+
     renderCurrentView();
+
+    if (isTableInput) {
+        const newTableInput = document.querySelector('.filter-input');
+        if (newTableInput) {
+            newTableInput.focus();
+            if (cursorPos !== null) {
+                newTableInput.setSelectionRange(cursorPos, cursorPos);
+            }
+        }
+    }
 }
 function handleRoleFilter(val) {
     state.roleFilter = val;
