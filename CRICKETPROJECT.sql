@@ -1,7 +1,6 @@
 -- ============================================================================
 -- DATABASE CREATION & SCHEMA DEFINITION: CricketTournamentDB
--- CricketBuddy - Premier Cricket Tournament Management System
--- Compatible with MySQL 8.0+ / 9.x / MariaDB / Cloud Databases (Aiven, PlanetScale)
+-- CricketBuddy - Tournament Management System
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS CricketTournamentDB;
@@ -9,7 +8,7 @@ USE CricketTournamentDB;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
--- Drop existing tables to allow safe idempotent re-runs
+-- Drop existing tables to allow safe re-runs
 DROP TABLE IF EXISTS MatchOfficials;
 DROP TABLE IF EXISTS TeamParticipation;
 DROP TABLE IF EXISTS MatchScorecard;
@@ -24,7 +23,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================================
 -- 1. CricketTeam Table
--- Stores participating tournament franchises and clubs
+-- Stores participating tournament teams
 -- ============================================================================
 CREATE TABLE CricketTeam (
     TeamID INT AUTO_INCREMENT PRIMARY KEY,
@@ -32,22 +31,22 @@ CREATE TABLE CricketTeam (
     Coach VARCHAR(100),
     HomeGround VARCHAR(100),
     Owner VARCHAR(100)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================================
 -- 2. CricketStadium Table
--- Stores venues hosting tournament fixtures
+-- Stores venues hosting matches
 -- ============================================================================
 CREATE TABLE CricketStadium (
     StadiumID INT AUTO_INCREMENT PRIMARY KEY,
     StadiumName VARCHAR(100) NOT NULL,
     City VARCHAR(100),
     Capacity INT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================================
 -- 3. CricketPlayer Table
--- Stores roster athletes, playing roles, squad affiliations and jersey numbers
+-- Stores players, roles, squad affiliations and jersey numbers
 -- ============================================================================
 CREATE TABLE CricketPlayer (
     PlayerID INT AUTO_INCREMENT PRIMARY KEY,
@@ -57,26 +56,25 @@ CREATE TABLE CricketPlayer (
     Nationality VARCHAR(50),
     JerseyNo INT,
     TeamID INT,
-    CONSTRAINT fk_player_team FOREIGN KEY (TeamID)
-        REFERENCES CricketTeam (TeamID)
+    FOREIGN KEY (TeamID) REFERENCES CricketTeam (TeamID)
         ON DELETE SET NULL
         ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================================
 -- 4. CricketUmpire Table
--- Stores certified match referees and on-field arbiters
+-- Stores certified match referees and umpires
 -- ============================================================================
 CREATE TABLE CricketUmpire (
     UmpireID INT AUTO_INCREMENT PRIMARY KEY,
     UmpireName VARCHAR(100) NOT NULL,
     Country VARCHAR(50),
     Experience INT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================================
 -- 5. TournamentMatch Table
--- Stores scheduled and completed tournament fixtures
+-- Stores scheduled and completed tournament matches
 -- ============================================================================
 CREATE TABLE TournamentMatch (
     MatchID INT AUTO_INCREMENT PRIMARY KEY,
@@ -84,15 +82,14 @@ CREATE TABLE TournamentMatch (
     MatchType VARCHAR(50) NOT NULL,
     Result VARCHAR(100) DEFAULT 'Scheduled',
     StadiumID INT,
-    CONSTRAINT fk_match_stadium FOREIGN KEY (StadiumID)
-        REFERENCES CricketStadium (StadiumID)
+    FOREIGN KEY (StadiumID) REFERENCES CricketStadium (StadiumID)
         ON DELETE SET NULL
         ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================================
 -- 6. TeamSponsor Table
--- Stores corporate financial partnerships and commercial agreements
+-- Stores team sponsorship agreements
 -- ============================================================================
 CREATE TABLE TeamSponsor (
     SponsorID INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,15 +97,14 @@ CREATE TABLE TeamSponsor (
     Industry VARCHAR(100),
     ContractAmount DECIMAL(18,2),
     TeamID INT,
-    CONSTRAINT fk_sponsor_team FOREIGN KEY (TeamID)
-        REFERENCES CricketTeam (TeamID)
+    FOREIGN KEY (TeamID) REFERENCES CricketTeam (TeamID)
         ON DELETE SET NULL
         ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================================
 -- 7. MatchScorecard Table
--- Detailed player performance logs per match (Runs, Balls, Wickets, Overs)
+-- Detailed player performance per match (Runs, Balls, Wickets, Overs)
 -- ============================================================================
 CREATE TABLE MatchScorecard (
     ScorecardID INT AUTO_INCREMENT PRIMARY KEY,
@@ -118,55 +114,49 @@ CREATE TABLE MatchScorecard (
     Overs DECIMAL(5,2) NOT NULL DEFAULT 0.00,
     PlayerID INT NOT NULL,
     MatchID INT NOT NULL,
-    CONSTRAINT fk_scorecard_player FOREIGN KEY (PlayerID)
-        REFERENCES CricketPlayer (PlayerID)
+    FOREIGN KEY (PlayerID) REFERENCES CricketPlayer (PlayerID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    CONSTRAINT fk_scorecard_match FOREIGN KEY (MatchID)
-        REFERENCES TournamentMatch (MatchID)
+    FOREIGN KEY (MatchID) REFERENCES TournamentMatch (MatchID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================================
 -- 8. TeamParticipation Table
--- Resolves many-to-many relationship between Teams and Matches
+-- Resolves relationship between Teams and Matches
 -- ============================================================================
 CREATE TABLE TeamParticipation (
     TeamID INT NOT NULL,
     MatchID INT NOT NULL,
     PRIMARY KEY (TeamID, MatchID),
-    CONSTRAINT fk_participation_team FOREIGN KEY (TeamID)
-        REFERENCES CricketTeam (TeamID)
+    FOREIGN KEY (TeamID) REFERENCES CricketTeam (TeamID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    CONSTRAINT fk_participation_match FOREIGN KEY (MatchID)
-        REFERENCES TournamentMatch (MatchID)
+    FOREIGN KEY (MatchID) REFERENCES TournamentMatch (MatchID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================================
 -- 9. MatchOfficials Table
--- Assigns certified umpires to tournament matches
+-- Assigns umpires to matches
 -- ============================================================================
 CREATE TABLE MatchOfficials (
     MatchID INT NOT NULL,
     UmpireID INT NOT NULL,
     PRIMARY KEY (MatchID, UmpireID),
-    CONSTRAINT fk_official_match FOREIGN KEY (MatchID)
-        REFERENCES TournamentMatch (MatchID)
+    FOREIGN KEY (MatchID) REFERENCES TournamentMatch (MatchID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    CONSTRAINT fk_official_umpire FOREIGN KEY (UmpireID)
-        REFERENCES CricketUmpire (UmpireID)
+    FOREIGN KEY (UmpireID) REFERENCES CricketUmpire (UmpireID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ============================================================================
 -- SEED DATA INSERTION
--- Populates authentic initial tournament records
+-- Populates initial tournament records
 -- ============================================================================
 
 -- 1. Insert Teams
@@ -207,20 +197,11 @@ INSERT INTO TeamSponsor (SponsorID, SponsorName, Industry, ContractAmount, TeamI
 INSERT INTO MatchScorecard (ScorecardID, Runs, BallsFaced, Wickets, Overs, PlayerID, MatchID) VALUES
 (1, 100, 35, 0, 0.00, 4, 1);
 
--- 8. Team Participations (Mumbai Indians vs Delhi Capitals in Match 1)
+-- 8. Team Participations
 INSERT INTO TeamParticipation (TeamID, MatchID) VALUES
 (1, 1),
 (2, 1);
 
--- 9. Match Officials (Nitin Menon presiding over Match 1)
+-- 9. Match Officials
 INSERT INTO MatchOfficials (MatchID, UmpireID) VALUES
 (1, 1);
-
--- Reset AUTO_INCREMENT counters to maximum IDs
-ALTER TABLE CricketTeam AUTO_INCREMENT = 7;
-ALTER TABLE CricketStadium AUTO_INCREMENT = 3;
-ALTER TABLE CricketPlayer AUTO_INCREMENT = 8;
-ALTER TABLE CricketUmpire AUTO_INCREMENT = 2;
-ALTER TABLE TournamentMatch AUTO_INCREMENT = 3;
-ALTER TABLE TeamSponsor AUTO_INCREMENT = 2;
-ALTER TABLE MatchScorecard AUTO_INCREMENT = 2;
