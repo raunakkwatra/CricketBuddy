@@ -200,9 +200,22 @@ const authManager = {
             const saved = localStorage.getItem('cb_auth');
             if (saved) {
                 state.currentUser = JSON.parse(saved);
+            } else {
+                state.currentUser = {
+                    username: 'Guest Viewer',
+                    role: 'viewer',
+                    org: '',
+                    token: null
+                };
             }
         } catch (e) {
             console.warn('Failed to parse stored auth session:', e);
+            state.currentUser = {
+                username: 'Guest Viewer',
+                role: 'viewer',
+                org: '',
+                token: null
+            };
         }
 
         this.updateUI();
@@ -224,31 +237,37 @@ const authManager = {
             if (typeof actionCallback === 'function') actionCallback();
             return true;
         } else {
-            showToast('Admin privilege required! Please log in as Admin.', 'warning');
-            this.openAuthModal();
+            showToast('Admin privilege required! Please log in as Administrator.', 'warning');
+            this.openAuthModal('admin');
             return false;
         }
     },
 
-    login(username, role) {
+    login(username, role, meta = {}) {
         state.currentUser = {
             username: username || (role === 'admin' ? 'Administrator' : 'Guest Viewer'),
             role: role || 'viewer',
-            token: `cb_mock_jwt_${role}_${Date.now()}`
+            org: meta.org || '',
+            token: `cb_jwt_${role}_${Date.now()}`
         };
         this.save();
         this.closeAuthModal();
-        showToast(`Signed in successfully as ${role.toUpperCase()}`, 'success');
+        if (role === 'admin') {
+            showToast('Unlocked Admin Mode (Full CRUD Access)', 'success');
+        } else {
+            showToast(`Welcome, ${state.currentUser.username}! Viewer mode active.`, 'success');
+        }
     },
 
     logout() {
         state.currentUser = {
             username: 'Guest Viewer',
             role: 'viewer',
+            org: '',
             token: null
         };
         this.save();
-        showToast('Logged out. Switched to Viewer mode.', 'info');
+        showToast('Signed out. Reset to Guest Viewer mode.', 'info');
     },
 
     updateUI() {
@@ -262,27 +281,70 @@ const authManager = {
         const authActionLabel = document.getElementById('authActionLabel');
 
         const isAdmin = this.isAdmin();
+        const username = (state.currentUser && state.currentUser.username) ? state.currentUser.username : 'Guest Viewer';
 
         if (roleLabel) roleLabel.textContent = isAdmin ? 'Admin' : 'Viewer';
         if (roleDot) {
             roleDot.className = `role-status-dot ${isAdmin ? 'admin-dot' : 'viewer-dot'}`;
         }
 
-        if (headerName) headerName.textContent = state.currentUser.username;
+        if (headerName) headerName.textContent = username;
         if (headerBadge) {
             headerBadge.textContent = isAdmin ? 'ADMIN' : 'VIEWER';
             headerBadge.className = `user-badge ${isAdmin ? 'admin-badge' : 'viewer-badge'}`;
         }
         if (headerAvatar) {
-            headerAvatar.textContent = isAdmin ? 'AD' : 'VW';
+            if (isAdmin) {
+                headerAvatar.textContent = 'AD';
+            } else {
+                const parts = username.trim().split(/\s+/);
+                const initials = parts.length > 1
+                    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+                    : username.slice(0, 2).toUpperCase();
+                headerAvatar.textContent = initials || 'VW';
+            }
         }
-        if (dropdownName) dropdownName.textContent = state.currentUser.username;
+        if (dropdownName) dropdownName.textContent = username;
         if (dropdownRoleDesc) {
-            dropdownRoleDesc.textContent = isAdmin ? 'Full CRUD Administrative Access' : 'Read-Only Viewer Access';
+            if (isAdmin) {
+                dropdownRoleDesc.textContent = 'Full CRUD Administrative Access';
+            } else if (state.currentUser.org) {
+                dropdownRoleDesc.textContent = `Viewer • ${state.currentUser.org}`;
+            } else {
+                dropdownRoleDesc.textContent = 'Read-Only Viewer Access';
+            }
         }
         if (authActionLabel) {
-            authActionLabel.textContent = isAdmin ? 'Log Out to Viewer' : 'Sign in as Admin';
+            authActionLabel.textContent = isAdmin ? 'Log Out to Viewer' : 'Sign Out to Guest';
         }
+    },
+
+    switchTab(tab) {
+        const tabAdmin = document.getElementById('tabBtnAdmin');
+        const tabViewer = document.getElementById('tabBtnViewer');
+        const paneAdmin = document.getElementById('adminTabPane');
+        const paneViewer = document.getElementById('viewerTabPane');
+
+        if (tab === 'admin') {
+            tabAdmin?.classList.add('active');
+            tabViewer?.classList.remove('active');
+            paneAdmin?.classList.add('active');
+            paneViewer?.classList.remove('active');
+            setTimeout(() => document.getElementById('adminPasswordInput')?.focus(), 100);
+        } else {
+            tabViewer?.classList.add('active');
+            tabAdmin?.classList.remove('active');
+            paneViewer?.classList.add('active');
+            paneAdmin?.classList.remove('active');
+            const nameInput = document.getElementById('viewerNameInput');
+            if (nameInput) {
+                if (state.currentUser && state.currentUser.role === 'viewer' && state.currentUser.username !== 'Guest Viewer') {
+                    nameInput.value = state.currentUser.username;
+                }
+                setTimeout(() => nameInput.focus(), 100);
+            }
+        }
+        refreshIcons();
     },
 
     bindEvents() {
@@ -299,44 +361,75 @@ const authManager = {
             });
         }
 
-        // Quick Role Switchers in dropdown
+        // Tab click listeners
+        document.getElementById('tabBtnAdmin')?.addEventListener('click', () => this.switchTab('admin'));
+        document.getElementById('tabBtnViewer')?.addEventListener('click', () => this.switchTab('viewer'));
+
+        // Dropdown actions
         document.getElementById('switchAdminBtn')?.addEventListener('click', () => {
-            this.login('Administrator', 'admin');
-        });
-        document.getElementById('switchViewerBtn')?.addEventListener('click', () => {
-            this.login('Guest Viewer', 'viewer');
+            document.getElementById('userDropdownPanel')?.classList.remove('show');
+            this.openAuthModal('admin');
         });
 
-        // Logout/Login action button
+        document.getElementById('switchViewerBtn')?.addEventListener('click', () => {
+            document.getElementById('userDropdownPanel')?.classList.remove('show');
+            this.openAuthModal('viewer');
+        });
+
         document.getElementById('authActionBtn')?.addEventListener('click', () => {
+            document.getElementById('userDropdownPanel')?.classList.remove('show');
             if (this.isAdmin()) {
                 this.logout();
+            } else if (state.currentUser.username !== 'Guest Viewer') {
+                this.logout();
             } else {
-                this.openAuthModal();
+                this.openAuthModal('admin');
             }
         });
 
-        // Auth Modal Handlers
+        // Close auth modal
         document.getElementById('closeAuthModalBtn')?.addEventListener('click', () => this.closeAuthModal());
-        document.getElementById('quickAdminLogin')?.addEventListener('click', () => this.login('Administrator', 'admin'));
-        document.getElementById('quickViewerLogin')?.addEventListener('click', () => this.login('Guest Viewer', 'viewer'));
 
-        document.getElementById('customAuthForm')?.addEventListener('submit', (e) => {
+        // Admin form submission (Password check)
+        document.getElementById('adminAuthForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
-            const uname = document.getElementById('authUsername').value.trim();
-            const pwd = document.getElementById('authPassword').value;
+            const pwdInput = document.getElementById('adminPasswordInput');
+            const pwd = pwdInput ? pwdInput.value : '';
 
-            if (uname.toLowerCase().includes('admin') || pwd === 'admin123') {
-                this.login(uname || 'Administrator', 'admin');
+            // Master admin password verification
+            if (pwd === 'admin123' || pwd === 'admin') {
+                pwdInput.value = '';
+                this.login('Administrator', 'admin');
             } else {
-                this.login(uname || 'Viewer User', 'viewer');
+                showToast('Invalid Admin password! Access denied.', 'error');
+                if (pwdInput) {
+                    pwdInput.value = '';
+                    pwdInput.focus();
+                }
             }
+        });
+
+        // Viewer form submission (Info collection, no password)
+        document.getElementById('viewerAuthForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('viewerNameInput')?.value.trim();
+            const org = document.getElementById('viewerOrgInput')?.value.trim();
+
+            if (!name) {
+                showToast('Please enter your name to continue.', 'warning');
+                return;
+            }
+
+            this.login(name, 'viewer', { org: org || '' });
         });
     },
 
-    openAuthModal() {
+    openAuthModal(defaultTab = 'admin') {
         const backdrop = document.getElementById('authModalBackdrop');
-        if (backdrop) backdrop.classList.add('active');
+        if (backdrop) {
+            backdrop.classList.add('active');
+            this.switchTab(defaultTab);
+        }
         refreshIcons();
     },
 

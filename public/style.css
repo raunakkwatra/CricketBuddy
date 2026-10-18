@@ -1712,76 +1712,109 @@ button {
     color: var(--text-muted);
     margin-top: 4px;
 }
-
-.auth-quick-cards {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.auth-role-card {
-    background-color: var(--bg-surface-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 14px;
+/* Auth Tabs Navigation */
+.auth-tabs-nav {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    transition: all var(--transition-fast);
+    gap: 8px;
+    background-color: var(--bg-surface-elevated);
+    padding: 6px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    border: 1px solid var(--border-subtle);
 }
 
-.auth-role-card:hover {
-    border-color: var(--border-medium);
-}
-
-.role-card-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
+.auth-tab-btn {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
 }
 
-.admin-bg { background-color: var(--accent-turf-light); color: var(--accent-turf); }
-.viewer-bg { background-color: var(--warning-light); color: var(--warning); }
+.auth-tab-btn:hover {
+    color: var(--text-main);
+    background-color: rgba(255, 255, 255, 0.05);
+}
 
-.role-card-info h3 {
-    font-size: 0.92rem;
-    font-weight: 700;
+.auth-tab-btn.active {
+    background-color: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.auth-tab-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+.auth-tab-pane {
+    display: none;
+    animation: fadeIn 0.2s ease;
+}
+
+.auth-tab-pane.active {
+    display: block;
+}
+
+/* Auth Info Banners */
+.auth-info-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 18px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.auth-info-banner i {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.auth-info-banner strong {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 3px;
+}
+
+.auth-info-banner p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.admin-banner {
+    background-color: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
     color: var(--text-main);
 }
-
-.role-card-info p {
-    font-size: 0.74rem;
-    color: var(--text-muted);
+.admin-banner i, .admin-banner strong {
+    color: var(--accent-turf);
 }
 
-.auth-divider {
-    text-align: center;
-    position: relative;
-    margin: 20px 0;
+.viewer-banner {
+    background-color: rgba(59, 130, 246, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: var(--text-main);
+}
+.viewer-banner i, .viewer-banner strong {
+    color: var(--primary);
 }
 
-.auth-divider::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 100%;
-    height: 1px;
-    background-color: var(--border-subtle);
-}
-
-.auth-divider span {
-    position: relative;
-    background-color: var(--bg-surface);
-    padding: 0 12px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: var(--text-faint);
-    letter-spacing: 0.05em;
+.required {
+    color: var(--danger);
 }
 
 /* --------------------------------------------------------------------------

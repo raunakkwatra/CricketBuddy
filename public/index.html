@@ -147,21 +147,21 @@
                                 <span id="dropdownRoleDesc">Full administrative control</span>
                             </div>
                             <div class="dropdown-divider"></div>
-                            <div class="dropdown-section-title">SWITCH ROLE (DEMO)</div>
+                            <div class="dropdown-section-title">ACCOUNT & ACCESS</div>
                             <button class="dropdown-item" id="switchAdminBtn">
                                 <i data-lucide="shield-check"></i>
-                                <span>Switch to Admin</span>
-                                <span class="kbd-hint">Full CRUD</span>
+                                <span>Admin Login</span>
+                                <span class="kbd-hint">Password</span>
                             </button>
                             <button class="dropdown-item" id="switchViewerBtn">
-                                <i data-lucide="eye"></i>
-                                <span>Switch to Viewer</span>
+                                <i data-lucide="user"></i>
+                                <span>Viewer Profile</span>
                                 <span class="kbd-hint">Read-Only</span>
                             </button>
                             <div class="dropdown-divider"></div>
                             <button class="dropdown-item danger-action" id="authActionBtn">
                                 <i data-lucide="log-out" id="authActionIcon"></i>
-                                <span id="authActionLabel">Log Out</span>
+                                <span id="authActionLabel">Sign Out</span>
                             </button>
                         </div>
                     </div>
@@ -199,44 +199,67 @@
         <div class="modal-card auth-modal-card" id="authModalCard" role="dialog" aria-modal="true">
             <div class="auth-modal-header">
                 <div class="auth-logo-badge">🏏</div>
-                <h2>Welcome to CricketBuddy</h2>
-                <p>Select your access mode or sign in to continue</p>
+                <h2>CricketBuddy Access</h2>
+                <p>Choose your access role to continue to the tournament portal</p>
                 <button class="modal-close-btn" id="closeAuthModalBtn"><i data-lucide="x"></i></button>
             </div>
-            <div class="auth-body">
-                <div class="auth-quick-cards">
-                    <div class="auth-role-card" id="quickAdminLogin">
-                        <div class="role-card-icon admin-bg"><i data-lucide="shield-check"></i></div>
-                        <div class="role-card-info">
-                            <h3>Admin Mode</h3>
-                            <p>Full control: Create, Edit & Delete teams, players, venues, matches, sponsors & umpires.</p>
-                        </div>
-                        <button class="btn btn-primary btn-block">Sign in as Admin</button>
-                    </div>
 
-                    <div class="auth-role-card" id="quickViewerLogin">
-                        <div class="role-card-icon viewer-bg"><i data-lucide="eye"></i></div>
-                        <div class="role-card-info">
-                            <h3>Viewer Mode</h3>
-                            <p>Browse statistics, search rosters, inspect fixtures, filter player performance.</p>
+            <!-- Tab Switcher (Admin vs Viewer) -->
+            <div class="auth-tabs-nav">
+                <button type="button" class="auth-tab-btn active" id="tabBtnAdmin" data-target="adminTabPane">
+                    <i data-lucide="shield-check"></i> Admin Login
+                </button>
+                <button type="button" class="auth-tab-btn" id="tabBtnViewer" data-target="viewerTabPane">
+                    <i data-lucide="user"></i> Viewer Access
+                </button>
+            </div>
+
+            <div class="auth-body">
+                <!-- Admin Tab Pane -->
+                <div class="auth-tab-pane active" id="adminTabPane">
+                    <div class="auth-info-banner admin-banner">
+                        <i data-lucide="shield-alert"></i>
+                        <div>
+                            <strong>Administrator Mode</strong>
+                            <p>Requires admin password. Gives full permissions to create, edit, and delete teams, players, matches, venues & scorecards.</p>
                         </div>
-                        <button class="btn btn-secondary btn-block">Continue as Viewer</button>
                     </div>
+                    <form id="adminAuthForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="adminPasswordInput">Admin Master Password</label>
+                            <div class="password-input-wrap">
+                                <input type="password" id="adminPasswordInput" class="form-control" placeholder="Enter admin password (admin123)" required autocomplete="current-password">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i data-lucide="lock-open"></i> Sign in as Admin
+                        </button>
+                    </form>
                 </div>
 
-                <div class="auth-divider"><span>OR SIGN IN WITH CREDENTIALS</span></div>
-
-                <form id="customAuthForm" class="auth-form">
-                    <div class="form-group">
-                        <label for="authUsername">Username or Email</label>
-                        <input type="text" id="authUsername" class="form-control" placeholder="admin or viewer" required>
+                <!-- Viewer Tab Pane -->
+                <div class="auth-tab-pane" id="viewerTabPane">
+                    <div class="auth-info-banner viewer-banner">
+                        <i data-lucide="info"></i>
+                        <div>
+                            <strong>Viewer Mode (Read-Only)</strong>
+                            <p>No password needed! Simply enter your name to view tournaments, teams, statistics, rosters, and match results.</p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="authPassword">Password</label>
-                        <input type="password" id="authPassword" class="form-control" placeholder="••••••••" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-                </form>
+                    <form id="viewerAuthForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="viewerNameInput">Your Full Name <span class="required">*</span></label>
+                            <input type="text" id="viewerNameInput" class="form-control" placeholder="e.g. Raunak Kwatra" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="viewerOrgInput">Organization / Affiliation (Optional)</label>
+                            <input type="text" id="viewerOrgInput" class="form-control" placeholder="e.g. Cricket Fan / Analyst / Media">
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-block">
+                            <i data-lucide="arrow-right-circle"></i> Continue as Viewer
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
