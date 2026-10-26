@@ -519,9 +519,38 @@ def build_full_document_xml():
     p.append(make_body_p("Traditionally, tournament management in universities and local athletic boards relied upon decentralized spreadsheets, paper scorebooks, and disconnected manual record-keeping. These antiquated methodologies suffer from severe data redundancies, lack of concurrency control, arithmetic inconsistencies in player averages, loss of historical records, and security vulnerabilities."))
     p.append(make_body_p("To eliminate these challenges, the Cricket Tournament Management System (CricketBuddy) was conceived as a centralized, relational database-driven web platform. Developed using MySQL 9.7 as the primary RDBMS, an Express.js / Node.js backend server, and a high-performance interactive frontend interface, CricketBuddy provides automated record management, referential integrity, and transparent data exploration for both administrators and viewers."))
     
+    repo_url = "https://github.com/raunakkwatra/CricketBuddy"
     p.append(make_para("Source Code & Repository:", bold=True, space_before=80, space_after=40))
     p.append(make_body_p("The complete source code, normalized SQL schema definitions, backend REST API routes, frontend controllers, and deployment configuration are maintained on GitHub:"))
-    p.append(make_para("GitHub Repository: https://github.com/raunakkwatra/CricketBuddy", bold=True, color="1E40AF", space_after=140))
+    p.append(f"""<w:p>
+  <w:pPr>
+    <w:spacing w:before="40" w:after="160" w:line="276" w:lineRule="auto"/>
+    <w:rPr>
+      <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+    </w:rPr>
+  </w:pPr>
+  <w:r>
+    <w:rPr>
+      <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+      <w:b/><w:bCs/>
+      <w:sz w:val="23"/><w:szCs w:val="23"/>
+      <w:color w:val="0F172A"/>
+    </w:rPr>
+    <w:t>GitHub Repository: </w:t>
+  </w:r>
+  <w:hyperlink r:id="rId30" w:history="1">
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+        <w:b/><w:bCs/>
+        <w:u w:val="single"/>
+        <w:sz w:val="23"/><w:szCs w:val="23"/>
+        <w:color w:val="1E40AF"/>
+      </w:rPr>
+      <w:t>{repo_url}</w:t>
+    </w:r>
+  </w:hyperlink>
+</w:p>""")
     
     p.append(make_heading2("1.2 Objectives of the Project"))
     p.append(make_body_p("The primary objectives established for the CricketBuddy system comprise:"))
@@ -909,10 +938,19 @@ def create_report():
     p14 = '/Users/raunakkwatra/.gemini/antigravity/brain/32b7a23b-8425-4491-8b87-b291fd8f590e/.user_uploaded/media_1792653357374_f7f5504e.png' # Fig 4.12 Auth Modal
     p15 = '/Users/raunakkwatra/.gemini/antigravity/brain/32b7a23b-8425-4491-8b87-b291fd8f590e/.user_uploaded/media_1792653357372_33c3d805.png' # Fig 4.13 Search
 
+    core_xml = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>Cricket Tournament Management System (CricketBuddy) - Project Report</dc:title><dc:subject>RDBMS CS2102 Project Report</dc:subject><dc:creator>Raunak Kwatra &amp; Kartikey Aggarwal</dc:creator><cp:keywords>CricketBuddy, RDBMS, MySQL, BCNF, Node.js, Express, Manipal University Jaipur</cp:keywords><dc:description>Academic Project Report for Relational Database Management Systems Laboratory (CS2102), Department of Computer Science and Engineering, Manipal University Jaipur.</dc:description><cp:lastModifiedBy>Raunak Kwatra</cp:lastModifiedBy><cp:revision>3</cp:revision><dcterms:created xsi:type="dcterms:W3CDTF">2026-10-26T05:45:00Z</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">2026-10-26T05:45:00Z</dcterms:modified></cp:coreProperties>"""
+
     with zipfile.ZipFile(TEMPLATE_PATH, 'r') as zin, zipfile.ZipFile(OUTPUT_PATH, 'w', compression=zipfile.ZIP_DEFLATED) as zout:
         for item in zin.infolist():
             if item.filename == 'word/document.xml':
                 zout.writestr(item, new_doc_xml.encode('utf-8'))
+            elif item.filename == 'docProps/core.xml':
+                zout.writestr(item, core_xml.encode('utf-8'))
+            elif item.filename == 'docProps/app.xml':
+                app_xml = zin.read(item.filename).decode('utf-8')
+                app_xml = app_xml.replace('<Company>HP</Company>', '<Company>Manipal University Jaipur</Company>')
+                zout.writestr(item, app_xml.encode('utf-8'))
             elif item.filename == 'word/_rels/document.xml.rels':
                 orig_rels = zin.read(item.filename).decode('utf-8')
                 new_rels = []
@@ -924,6 +962,8 @@ def create_report():
                     new_rels.append('<Relationship Id="rId28" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image14.jpeg"/>')
                 if 'rId29' not in orig_rels:
                     new_rels.append('<Relationship Id="rId29" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image15.jpeg"/>')
+                if 'rId30' not in orig_rels:
+                    new_rels.append('<Relationship Id="rId30" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://github.com/raunakkwatra/CricketBuddy" TargetMode="External"/>')
                 if new_rels:
                     orig_rels = orig_rels.replace('</Relationships>', "".join(new_rels) + '</Relationships>')
                 zout.writestr(item, orig_rels.encode('utf-8'))
