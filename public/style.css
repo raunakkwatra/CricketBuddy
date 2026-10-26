@@ -158,6 +158,37 @@ button {
     cursor: pointer;
 }
 
+/* Universal icon handling for Lucide and Inline SVG Fallbacks */
+[data-lucide],
+i[data-lucide] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    vertical-align: middle;
+    width: 1.15em;
+    height: 1.15em;
+    flex-shrink: 0;
+}
+
+[data-lucide] > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    fill: none;
+}
+
+svg.lucide {
+    display: inline-block;
+    vertical-align: middle;
+    width: 1.15em;
+    height: 1.15em;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
     width: 6px;
@@ -305,7 +336,8 @@ button {
     transition: all var(--transition-fast);
 }
 
-.menu-item i {
+.menu-item i,
+.menu-item svg {
     width: 18px;
     height: 18px;
     transition: color var(--transition-fast);
@@ -555,9 +587,11 @@ button {
     flex-shrink: 0;
 }
 
-.search-result-icon i {
+.search-result-icon i,
+.search-result-icon svg {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
 }
 
 .search-result-info {
@@ -623,9 +657,11 @@ button {
     border-color: var(--border-medium);
 }
 
-.btn-icon i {
+.btn-icon i,
+.btn-icon svg {
     width: 18px;
     height: 18px;
+    flex-shrink: 0;
 }
 
 /* Theme Switcher Toggle */
@@ -657,6 +693,13 @@ button {
     width: 16px;
     height: 16px;
     z-index: 1;
+}
+
+.theme-icon i,
+.theme-icon svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
 }
 
 .sun-icon {
@@ -827,10 +870,12 @@ button {
     transition: background-color var(--transition-fast);
 }
 
-.dropdown-item i {
+.dropdown-item i,
+.dropdown-item svg {
     width: 16px;
     height: 16px;
     color: var(--text-muted);
+    flex-shrink: 0;
 }
 
 .dropdown-item:hover {
@@ -850,8 +895,10 @@ button {
 .danger-action {
     color: var(--danger);
 }
-.danger-action i {
+.danger-action i,
+.danger-action svg {
     color: var(--danger);
+    flex-shrink: 0;
 }
 .danger-action:hover {
     background-color: var(--danger-light);
@@ -903,6 +950,13 @@ button {
     transition: all var(--transition-fast);
 }
 
+.btn i,
+.btn svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
 .btn-primary {
     background-color: var(--primary);
     color: white;
@@ -935,6 +989,13 @@ button {
 .btn-sm {
     padding: 5px 10px;
     font-size: 0.78rem;
+}
+
+.btn-sm i,
+.btn-sm svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
 }
 
 .btn-block {
@@ -993,6 +1054,13 @@ button {
     font-weight: 600;
 }
 
+.hero-pill i,
+.hero-pill svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
 /* Quick Actions Toolbar */
 .quick-actions-card {
     background-color: var(--bg-surface);
@@ -1017,6 +1085,14 @@ button {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.quick-actions-header h3 i,
+.quick-actions-header h3 svg {
+    width: 18px;
+    height: 18px;
+    color: var(--primary);
+    flex-shrink: 0;
 }
 
 .quick-actions-buttons {
@@ -1047,7 +1123,8 @@ button {
     transform: translateY(-1px);
 }
 
-.action-pill-btn i {
+.action-pill-btn i,
+.action-pill-btn svg {
     width: 15px;
     height: 15px;
     color: var(--primary);
@@ -1142,6 +1219,13 @@ button {
     gap: 4px;
 }
 
+.stat-subtext i,
+.stat-subtext svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
 .stat-icon-wrapper {
     width: 44px;
     height: 44px;
@@ -1153,7 +1237,8 @@ button {
     color: var(--stat-accent, var(--primary));
 }
 
-.stat-icon-wrapper i {
+.stat-icon-wrapper i,
+.stat-icon-wrapper svg {
     width: 22px;
     height: 22px;
 }
@@ -1332,7 +1417,8 @@ button {
     min-width: 200px;
 }
 
-.filter-input-wrap i {
+.filter-input-wrap i,
+.filter-input-wrap svg {
     position: absolute;
     left: 12px;
     top: 50%;
@@ -1340,6 +1426,7 @@ button {
     width: 15px;
     height: 15px;
     color: var(--text-faint);
+    flex-shrink: 0;
 }
 
 .filter-input {
@@ -1424,6 +1511,13 @@ button {
     white-space: nowrap;
 }
 
+.badge i,
+.badge svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+}
+
 .badge-primary { background: var(--primary-light); color: var(--primary); }
 .badge-success { background: var(--accent-turf-light); color: var(--accent-turf); }
 .badge-warning { background: var(--warning-light); color: var(--warning); }
@@ -1469,7 +1563,8 @@ button {
     border-color: var(--danger);
 }
 
-.btn-table-action i {
+.btn-table-action i,
+.btn-table-action svg {
     width: 14px;
     height: 14px;
 }
@@ -1496,9 +1591,11 @@ button {
     margin-bottom: 4px;
 }
 
-.empty-icon i {
+.empty-icon i,
+.empty-icon svg {
     width: 26px;
     height: 26px;
+    flex-shrink: 0;
 }
 
 .table-empty-state h4 {
@@ -1666,9 +1763,11 @@ button {
     margin-bottom: 14px;
 }
 
-.delete-warn-icon i {
+.delete-warn-icon i,
+.delete-warn-icon svg {
     width: 28px;
     height: 28px;
+    flex-shrink: 0;
 }
 
 .delete-confirm-box h4 {
@@ -1751,9 +1850,11 @@ button {
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
 }
 
-.auth-tab-btn i {
+.auth-tab-btn i,
+.auth-tab-btn svg {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
 }
 
 .auth-tab-pane {
@@ -1777,7 +1878,8 @@ button {
     line-height: 1.45;
 }
 
-.auth-info-banner i {
+.auth-info-banner i,
+.auth-info-banner svg {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
@@ -1800,7 +1902,7 @@ button {
     border: 1px solid rgba(16, 185, 129, 0.3);
     color: var(--text-main);
 }
-.admin-banner i, .admin-banner strong {
+.admin-banner i, .admin-banner svg, .admin-banner strong {
     color: var(--accent-turf);
 }
 
@@ -1809,7 +1911,7 @@ button {
     border: 1px solid rgba(59, 130, 246, 0.3);
     color: var(--text-main);
 }
-.viewer-banner i, .viewer-banner strong {
+.viewer-banner i, .viewer-banner svg, .viewer-banner strong {
     color: var(--primary);
 }
 
@@ -1861,7 +1963,8 @@ button {
     }
 }
 
-.toast i {
+.toast i,
+.toast svg {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
@@ -1870,12 +1973,12 @@ button {
 .toast.success {
     border-left: 4px solid var(--accent-turf);
 }
-.toast.success i { color: var(--accent-turf); }
+.toast.success i, .toast.success svg { color: var(--accent-turf); }
 
 .toast.error {
     border-left: 4px solid var(--danger);
 }
-.toast.error i { color: var(--danger); }
+.toast.error i, .toast.error svg { color: var(--danger); }
 
 .toast.warning {
     border-left: 4px solid var(--warning);
