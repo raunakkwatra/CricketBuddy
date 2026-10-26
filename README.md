@@ -21,13 +21,10 @@ A full-stack, responsive Cricket Tournament Management System featuring complete
 │   ├── app.js                      # Frontend logic (State, RBAC, CRUD modals)
 │   └── lucide.min.js               # Offline local Lucide icon library
 ├── project rdbms.sql               # Normalized MySQL schema DDL & seed data
-├── CricketTournamentDB_backup.sql  # Full MySQL database backup dump
 ├── db.js                           # MySQL connection pool (with SSL support)
 ├── server.js                       # Express REST API routes and controllers
 ├── er_diagram.png                  # Chen-notation ER Diagram (9 relations)
-├── generate_er_diagram.py          # Script generating the high-res ER Diagram
 ├── CricketBuddy_Project_Report.docx# Official academic project report (MUJ)
-├── build_cricket_report.py         # Automated report builder script
 ├── .env.example                    # Environment variables template
 ├── .gitignore                      # Git ignore rules
 └── package.json                    # Project dependencies and start scripts

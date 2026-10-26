@@ -13,10 +13,13 @@ Thumbs.db
 ~$*.docx
 *.zip
 
-# Temporary & raw screenshots
+# Temporary & raw screenshots & local generator scripts
 Screenshot *.png
 scratch/
 EV_Charging_ERD*
+CricketTournamentDB_backup.sql
+generate_er_diagram.py
+build_cricket_report.py
 
 # Logs
 logs/
