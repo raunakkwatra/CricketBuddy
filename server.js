@@ -790,11 +790,8 @@ app.get('*', (req, res) => {
 
 const port = Number(process.env.PORT || 3000);
 
-// Only listen directly when not running in Vercel serverless environment
-if (!process.env.VERCEL) {
-  app.listen(port, () => {
-    console.log(`🏏 CricketBuddy Tournament Control running at http://localhost:${port}`);
-  });
-}
+app.listen(port, () => {
+  console.log(`🏏 CricketBuddy Tournament Control running at http://localhost:${port}`);
+});
 
 module.exports = app;
