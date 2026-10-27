@@ -783,6 +783,49 @@ app.get('/api/statistics', async (req, res) => {
   }
 });
 
+// ==========================================================================
+// 12. Database Views API (Encapsulated Multi-Table Queries)
+// ==========================================================================
+const TOURNAMENT_VIEWS = {
+  'team-details': { viewName: 'TeamDetails', description: 'Complete Team Profiles & Ownership' },
+  'player-details': { viewName: 'PlayerDetails', description: 'Player Rosters with Team Names' },
+  'match-details': { viewName: 'MatchDetails', description: 'Match Schedules with Stadiums & Host Cities' },
+  'team-sponsors': { viewName: 'TeamSponsorDetails', description: 'Commercial Team Sponsorships & Valuations' },
+  'match-scorecards': { viewName: 'MatchScorecardDetails', description: 'Comprehensive Match Scorecards' },
+  'team-participation': { viewName: 'TeamMatchParticipation', description: 'Team Match Participation & Results' },
+  'match-officials': { viewName: 'MatchOfficialsDetails', description: 'Officiating Umpires with International Accreditation' }
+};
+
+app.get('/api/views', (req, res) => {
+  res.json({
+    message: 'Available MySQL Database Views in CricketTournamentDB',
+    views: TOURNAMENT_VIEWS
+  });
+});
+
+app.get('/api/views/:viewKey', async (req, res) => {
+  try {
+    const key = req.params.viewKey.toLowerCase();
+    const viewConfig = TOURNAMENT_VIEWS[key];
+    if (!viewConfig) {
+      return res.status(404).json({
+        error: `View '${req.params.viewKey}' not found.`,
+        availableViews: Object.keys(TOURNAMENT_VIEWS)
+      });
+    }
+
+    const [rows] = await pool.query(`SELECT * FROM ${viewConfig.viewName}`);
+    res.json({
+      view: viewConfig.viewName,
+      description: viewConfig.description,
+      count: rows.length,
+      data: rows
+    });
+  } catch (error) {
+    handleDbError(res, error, `Could not query view ${req.params.viewKey}`);
+  }
+});
+
 // Fallback to serve SPA index.html for unknown routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

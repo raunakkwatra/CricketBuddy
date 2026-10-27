@@ -8,7 +8,7 @@ A full-stack, responsive Cricket Tournament Management System featuring complete
 
 - **Frontend**: Vanilla JavaScript (SPA), HTML5, CSS3 with Custom CSS Variables (Light & Dark mode), Lucide Icons
 - **Backend**: Node.js & Express REST API
-- **Database**: MySQL 9.7 (Catalog: `CricketTournamentDB`, normalized to BCNF)
+- **Database**: MySQL 9.7 (Catalog: `CricketTournamentDB`, normalized to BCNF, with 7 SQL Views)
 
 ---
 
@@ -20,9 +20,10 @@ A full-stack, responsive Cricket Tournament Management System featuring complete
 │   ├── style.css                   # Master stylesheet (Dark/Light themes)
 │   ├── app.js                      # Frontend logic (State, RBAC, CRUD modals)
 │   └── lucide.min.js               # Offline local Lucide icon library
+├── CricketTournamentDB.sql         # Master DDL with 9 tables, seed records & 7 views
 ├── project rdbms.sql               # Normalized MySQL schema DDL & seed data
 ├── db.js                           # MySQL connection pool (with SSL support)
-├── server.js                       # Express REST API routes and controllers
+├── server.js                       # Express REST API routes, controllers & view endpoints
 ├── er_diagram.png                  # Chen-notation ER Diagram (9 relations)
 ├── CricketBuddy_Project_Report.docx# Official academic project report (MUJ)
 ├── .env.example                    # Environment variables template
@@ -79,3 +80,20 @@ A full-stack, responsive Cricket Tournament Management System featuring complete
 
 - **Admin**: Full CRUD access. Create, edit, and delete teams, players, stadiums, sponsors, matches, umpires, and scorecards (Password: `admin123`).
 - **Viewer**: Read-only exploration access. Search, filter, inspect match statistics, and browse squad rosters without password authentication.
+
+---
+
+## 🔍 Database Views (Virtual Tables)
+
+The database includes 7 pre-compiled MySQL Views simplifying multi-table JOINs, accessible via the backend API at `/api/views` or `/api/views/:viewName`:
+
+| View Name | Base Tables Joined | Description |
+|---|---|---|
+| `TeamDetails` | `CricketTeam` | Complete team profiles, coaches, grounds & owners |
+| `PlayerDetails` | `CricketPlayer`, `CricketTeam` | Full player roster with franchise team names |
+| `MatchDetails` | `TournamentMatch`, `CricketStadium` | Match schedules with stadium names & host cities |
+| `TeamSponsorDetails` | `TeamSponsor`, `CricketTeam` | Brand partnerships & commercial contract values |
+| `MatchScorecardDetails` | `MatchScorecard`, `CricketPlayer`, `CricketTeam`, `TournamentMatch` | Multi-way JOIN aggregating runs, balls & wickets |
+| `TeamMatchParticipation` | `TeamParticipation`, `CricketTeam`, `TournamentMatch` | Fixture participation lineups & match results |
+| `MatchOfficialsDetails` | `MatchOfficials`, `TournamentMatch`, `CricketUmpire` | Accredited umpires & officiating experience |
+

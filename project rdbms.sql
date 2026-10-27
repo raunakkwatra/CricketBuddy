@@ -157,7 +157,110 @@ CREATE TABLE IF NOT EXISTS MatchOfficials (
 
 
 -- ============================================================
--- CHECK TABLES
+-- 10. DATABASE VIEWS (VIRTUAL TABLES)
+-- Encapsulating complex multi-table JOINs for simplified querying
 -- ============================================================
 
-SHOW TABLES;
+-- View 1: Complete Team Profiles
+CREATE OR REPLACE VIEW TeamDetails AS
+SELECT
+    TeamID,
+    TeamName,
+    Coach,
+    HomeGround,
+    Owner
+FROM CricketTeam;
+
+-- View 2: Player Profiles with Franchise Team Association
+CREATE OR REPLACE VIEW PlayerDetails AS
+SELECT
+    p.PlayerID,
+    p.PlayerName,
+    p.Age,
+    p.Role,
+    p.Nationality,
+    p.JerseyNo,
+    t.TeamName
+FROM CricketPlayer p
+LEFT JOIN CricketTeam t
+    ON p.TeamID = t.TeamID;
+
+-- View 3: Match Schedules with Host Stadium and City
+CREATE OR REPLACE VIEW MatchDetails AS
+SELECT
+    m.MatchID,
+    m.MatchDate,
+    m.MatchType,
+    m.Result,
+    s.StadiumName,
+    s.City
+FROM TournamentMatch m
+LEFT JOIN CricketStadium s
+    ON m.StadiumID = s.StadiumID;
+
+-- View 4: Commercial Team Sponsorships & Contract Valuations
+CREATE OR REPLACE VIEW TeamSponsorDetails AS
+SELECT
+    s.SponsorID,
+    s.SponsorName,
+    s.Industry,
+    s.ContractAmount,
+    t.TeamName
+FROM TeamSponsor s
+LEFT JOIN CricketTeam t
+    ON s.TeamID = t.TeamID;
+
+-- View 5: Comprehensive Match Scorecards with Player and Team Details
+CREATE OR REPLACE VIEW MatchScorecardDetails AS
+SELECT
+    sc.ScorecardID,
+    p.PlayerName,
+    t.TeamName,
+    m.MatchID,
+    m.MatchDate,
+    sc.Runs,
+    sc.BallsFaced,
+    sc.Wickets,
+    sc.Overs
+FROM MatchScorecard sc
+JOIN CricketPlayer p
+    ON sc.PlayerID = p.PlayerID
+LEFT JOIN CricketTeam t
+    ON p.TeamID = t.TeamID
+JOIN TournamentMatch m
+    ON sc.MatchID = m.MatchID;
+
+-- View 6: Team Match Participation and Results
+CREATE OR REPLACE VIEW TeamMatchParticipation AS
+SELECT
+    t.TeamName,
+    m.MatchID,
+    m.MatchDate,
+    m.MatchType,
+    m.Result
+FROM TeamParticipation tp
+JOIN CricketTeam t
+    ON tp.TeamID = t.TeamID
+JOIN TournamentMatch m
+    ON tp.MatchID = m.MatchID;
+
+-- View 7: Match Officiating Umpires and International Accreditation
+CREATE OR REPLACE VIEW MatchOfficialsDetails AS
+SELECT
+    m.MatchID,
+    m.MatchDate,
+    u.UmpireName,
+    u.Country,
+    u.Experience
+FROM MatchOfficials mo
+JOIN TournamentMatch m
+    ON mo.MatchID = m.MatchID
+JOIN CricketUmpire u
+    ON mo.UmpireID = u.UmpireID;
+
+
+-- ============================================================
+-- CHECK TABLES & VIEWS
+-- ============================================================
+
+SHOW FULL TABLES;
